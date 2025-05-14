@@ -1,0 +1,10 @@
+{
+  "name": "TinyCompiler",
+  "scripts": {
+    "test": "vitest --watch"
+  },
+  "packageManager": "yarn@4.6.0",
+  "dependencies": {
+    "vitest": "^3.1.3"
+  }
+}
