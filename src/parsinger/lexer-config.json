@@ -1,0 +1,46 @@
+{
+  "dfa": [
+    {
+      "transitions": {
+        "letter": 1,
+        "digit": 2,
+        "operator": 4
+      }
+    },
+    {
+      "transitions": {
+        "letter": 1,
+        "digit": 1
+      },
+      "accept": "identifier"
+    },
+    {
+      "transitions": {
+        "digit": 2,
+        "dot": 3
+      },
+      "accept": "integer"
+    },
+    {
+      "transitions": {
+        "digit": 5
+      }
+    },
+    {
+      "transitions": {},
+      "accept": "operator"
+    },
+    {
+      "transitions": {
+        "digit": 5
+      },
+      "accept": "float"
+    }
+  ],
+  "charTypes": {
+    "letter": "[a-zA-Z_]",
+    "digit": "[0-9]",
+    "dot": "\\.",
+    "operator": "[=+\\-*/]"
+  }
+}
