@@ -16,23 +16,30 @@ interface DFAState {
 interface LexerConfig {
     dfa: DFAState[];
     charTypes: Record<string, string>;
+    keywords?: string[];
 }
 
 // 词法分析器类
 class DynamicLexer {
     private dfa: DFAState[];
     private readonly charTypeRules: Record<string, RegExp>;
+    private readonly keywords: string[];
 
     constructor(config: LexerConfig) {
         this.dfa = config.dfa;
         this.charTypeRules = this.compileCharTypeRules(config.charTypes);
+        this.keywords = config.keywords || [];
     }
 
     // 编译传入的正则式
     private compileCharTypeRules(rules: Record<string, string>): Record<string, RegExp> {
         const compiled: Record<string, RegExp> = {};
         for (const [type, pattern] of Object.entries(rules)) {
-            compiled[type] = new RegExp(`^${pattern}$`);
+            try {
+                compiled[type] = new RegExp(`^${pattern}$`);
+            } catch (e) {
+                throw new Error(`Invalid regex pattern for '${type}': '${pattern}'. Error: ${e.message}`);
+            }
         }
         return compiled;
     }
@@ -77,10 +84,16 @@ class DynamicLexer {
 
             // 如果没有终态抛出错误
             if (lastAcceptToken) {
-                tokens.push({
+                const token: Token = {
                     type: lastAcceptToken,
                     value: input.substring(startPos, lastAcceptPos)
-                });
+                };
+
+                if (token.type === 'identifier' && this.keywords.includes(token.value)) {
+                    token.type = 'keyword';
+                }
+
+                tokens.push(token);
                 pos = lastAcceptPos;
             } else {
                 throw new Error(`Lexical error at position ${pos}: unexpected character '${input[pos]}'`);
@@ -113,9 +126,17 @@ function loadInput(filePath: string): string {
 // @ts-ignore
 (async () => {
     try {
+        // 从命令行获取参数：DFA文件路径和输入单词
+        const dfaFilePath = process.argv[3];
+        const input = process.argv[2];
+
+        if (!input) {
+            throw new Error('用法: ts-node main.ts <输入单词> [dfa文件路径]');
+        }
+
         // 从文件加载配置和输入
-        const config = loadConfig('./lexer-config.json');
-        const input = loadInput('./expression.txt');
+        const config = loadConfig(dfaFilePath ?? './lexer-config.json');
+        // const input = loadInput('./expression.txt');
 
         // 创建词法分析器实例
         const lexer = new DynamicLexer(config);

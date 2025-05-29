@@ -42,5 +42,6 @@
     "digit": "[0-9]",
     "dot": "\\.",
     "operator": "[=+\\-*/]"
-  }
+  },
+  "keywords": ["let", "const", "if", "else", "function", "var", "enum", "class", "interface"]
 }
