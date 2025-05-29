@@ -1,5 +1,5 @@
-import { Configuration, SyntaxTreeNode, Production } from './types';
-import { isTerminal } from './driver';
+import { Configuration, SyntaxTreeNode } from './types';
+
 
 /**
  * 根据格局转换过程构建语法树
@@ -34,21 +34,17 @@ export function buildSyntaxTree(configs: Configuration[]): SyntaxTreeNode {
                 };
                 children.push(child);
 
-                // 非终结符节点需要入栈等待展开
-                if (!isTerminal(symbol)) {
-                    nodeStack.push(child);
-                }
+                // 所有节点都入栈（包括终结符）
+                nodeStack.push(child);
             }
 
             // 设置父节点的子节点（保持右部顺序）
             parent.children = children;
         } else {
-            // 匹配终结符：弹出栈顶终结符节点，设置值
-            const topSymbol = prevConfig.stack[prevConfig.stack.length - 1];
-            if (isTerminal(topSymbol)) {
-                const leaf = nodeStack.pop()!;
-                leaf.value = config.input[0]; // 设置终结符的实际值
-            }
+            // 匹配终结符：弹出栈顶节点，设置值
+            const leaf = nodeStack.pop()!;
+            // 被匹配的终结符是前一个格局剩余输入的第一个符号
+            leaf.value = prevConfig.input[0];
         }
     }
 
